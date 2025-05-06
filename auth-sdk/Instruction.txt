@@ -1,0 +1,162 @@
+# Auth SDK Technical Documentation
+
+## Overview
+
+The Auth SDK is a modular JavaScript authentication library designed to abstract provider-specific implementations behind a unified interface. It allows applications to easily integrate authentication while providing the flexibility to switch providers with minimal changes to application code.
+
+## Architecture
+
+The SDK follows a layered architecture with abstraction at its core:
+
+1. **Main SDK Layer** - Exposes a unified API to applications
+2. **Abstract Provider Layer** - Defines the interface that all providers must implement
+3. **Provider Implementations** - Concrete implementations for specific authentication providers
+4. **Application Integration Layer** - Framework-specific integrations (e.g., Angular)
+
+### Key Design Patterns
+
+- **Factory Pattern** - Used to instantiate the appropriate provider based on configuration
+- **Adapter Pattern** - Each provider implementation adapts the specific authentication service to the common interface
+- **Dependency Injection** - The provider is injected into the SDK for flexibility and testability
+
+## Core Components
+
+### `AuthSDK` Class
+
+The main entry point for applications. It provides methods for:
+
+- Authentication flows (login, logout)
+- User information retrieval
+- Profile management
+- Password reset
+
+#### Key Methods:
+
+```javascript
+login()              // Initiates the login flow
+logout()             // Logs out the current user
+isAuthenticated()    // Checks if a user is currently authenticated
+getUser()            // Gets the complete user object
+getUserProfileFields()  // Gets standardized profile fields (firstName, lastName, etc.)
+updateUserProfile()  // Updates user profile information
+resetPassword()      // Initiates the password reset flow
+```
+
+### `AuthProvider` Abstract Class
+
+Defines the contract that all provider implementations must follow.
+
+#### Key Methods to Implement:
+
+```javascript
+login()              // Provider-specific login implementation
+logout()             // Provider-specific logout implementation
+getUser()            // Provider-specific user retrieval
+isAuthenticated()    // Provider-specific authentication check
+getToken()           // Provider-specific token retrieval
+resetPassword()      // Provider-specific password reset
+updateUserProfile()  // Provider-specific profile update
+getUserProfileFields()  // Provider-specific profile field extraction
+```
+
+### `Auth0Provider` Class
+
+Concrete implementation for Auth0 authentication service.
+
+#### Implementation Details:
+
+- Utilizes Auth0 SPA SDK for authentication flows
+- Handles redirect-based authentication
+- Manages tokens in browser storage
+- Makes API calls to Auth0 Management API for profile management
+- Implements password reset via Auth0 endpoints
+
+## Data Flow
+
+1. **Authentication Flow**:
+   - Application calls `authSDK.login()`
+   - SDK delegates to the provider's `login()` method
+   - Provider redirects to authentication service (e.g., Auth0)
+   - User authenticates on the provider's login page
+   - Provider redirects back to the application
+   - Provider handles the callback and stores authentication state
+   - Application checks authentication status
+
+2. **Profile Management Flow**:
+   - Application calls `authSDK.updateUserProfile({ firstName, lastName })`
+   - SDK delegates to the provider's `updateUserProfile()` method
+   - Provider makes API calls to update user metadata
+   - Provider returns updated user information
+   - Application displays updated profile
+
+3. **Password Reset Flow**:
+   - Application calls `authSDK.resetPassword(email)`
+   - SDK delegates to the provider's `resetPassword()` method
+   - Provider initiates password reset process
+   - Authentication service sends reset email to the user
+   - User follows link to reset password outside the application
+
+## Configuration
+
+The SDK is configured through a configuration object passed to its constructor:
+
+```javascript
+const authSDK = new AuthSDK({
+  provider: 'auth0',  // The provider to use
+  providerConfig: {
+    domain: 'your-domain.auth0.com',
+    clientId: 'your-client-id',
+    redirectUri: 'http://localhost:4200/callback',
+    // Other provider-specific configuration
+  }
+});
+```
+
+## Angular Integration
+
+The SDK is designed to integrate easily with Angular applications through an Angular service wrapper.
+
+### Auth Service
+
+The Angular Auth Service wraps the SDK and provides:
+- Observable streams for authenticated user
+- Angular-specific error handling
+- Integration with Angular's change detection
+
+### Components
+
+- **Home Component** - Displays user profile and provides forms for profile editing
+- **Callback Component** - Handles the authentication redirect callback
+
+## Error Handling
+
+The SDK provides comprehensive error handling:
+
+1. Each method returns a Promise that can be caught for error handling
+2. Errors include details specific to the operation and provider
+3. Consistent error format across providers for application predictability
+
+## Security Considerations
+
+- Tokens are stored in browser storage with appropriate security measures
+- Cross-Origin authentication is handled according to best practices
+- API calls use proper authorization headers
+- User data is validated before being sent to providers
+
+## Extensibility
+
+### Adding a New Provider
+
+To add a new authentication provider:
+
+1. Create a new class that extends `AuthProvider`
+2. Implement all required methods with provider-specific logic
+3. Add the provider to the factory method in `AuthSDK`
+4. Update application configuration to use the new provider
+
+## Best Practices
+
+- Always check authentication status before displaying protected content
+- Handle errors gracefully with user-friendly messages
+- Use the standardized profile fields for consistency
+- Implement proper state management for authentication status
