@@ -1,0 +1,47 @@
+import AuthProvider from './providers/auth-provider.js';
+import Auth0Provider from './providers/auth0-provider.js';
+
+class AuthSDK {
+  constructor(config) {
+    this.config = config;
+    this.provider = this._initializeProvider();
+  }
+
+  _initializeProvider() {
+    // Factory pattern to create the appropriate provider
+    switch (this.config.provider) {
+      case 'auth0':
+        return new Auth0Provider(this.config.providerConfig);
+      // Future providers can be added here
+      // case 'firebase':
+      //   return new FirebaseProvider(this.config.providerConfig);
+      // case 'okta':
+      //   return new OktaProvider(this.config.providerConfig);
+      default:
+        throw new Error(`Provider ${this.config.provider} not supported`);
+    }
+  }
+
+  // Public methods that delegate to the provider
+  async login() {
+    return this.provider.login();
+  }
+
+  async logout() {
+    return this.provider.logout();
+  }
+
+  async getUser() {
+    return this.provider.getUser();
+  }
+
+  async isAuthenticated() {
+    return this.provider.isAuthenticated();
+  }
+
+  async getToken() {
+    return this.provider.getToken();
+  }
+}
+
+export default AuthSDK;
