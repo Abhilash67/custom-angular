@@ -1,0 +1,36 @@
+// auth-sdk/providers/auth-provider.js
+
+/**
+ * Abstract base class for authentication providers
+ * Any new provider must implement these methods
+ */
+class AuthProvider {
+    constructor(config) {
+      if (this.constructor === AuthProvider) {
+        throw new Error("Cannot instantiate abstract AuthProvider class directly");
+      }
+      this.config = config;
+    }
+  
+    async login() {
+      throw new Error("Method 'login()' must be implemented");
+    }
+  
+    async logout() {
+      throw new Error("Method 'logout()' must be implemented");
+    }
+  
+    async getUser() {
+      throw new Error("Method 'getUser()' must be implemented");
+    }
+  
+    async isAuthenticated() {
+      throw new Error("Method 'isAuthenticated()' must be implemented");
+    }
+  
+    async getToken() {
+      throw new Error("Method 'getToken()' must be implemented");
+    }
+  }
+  
+  export default AuthProvider;
