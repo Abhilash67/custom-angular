@@ -1,0 +1,25 @@
+// rollup.config.js
+const { nodeResolve } = require('@rollup/plugin-node-resolve');
+
+module.exports = {
+  input: 'index.js',
+  output: [
+    {
+      file: 'dist/auth-sdk.js',
+      format: 'esm',
+      name: 'AuthSDK'
+    },
+    {
+      file: 'dist/auth-sdk.umd.js',
+      format: 'umd',
+      name: 'AuthSDK',
+      globals: {
+        '@auth0/auth0-spa-js': 'auth0'
+      }
+    }
+  ],
+  external: ['@auth0/auth0-spa-js'],
+  plugins: [
+    nodeResolve()
+  ]
+};
